@@ -1,6 +1,6 @@
 # 6502-hello-world
 
-A repo with tools for aiding 65xx cpu development
+A repo for holding my 6502 hello world code
 
 ## Prerequisites
 
