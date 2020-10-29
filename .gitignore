@@ -105,3 +105,6 @@ dist
 
 # Compiled c64/VICE executables
 *.prg
+
+# Binary files I generate with rom.js
+*.bin
