@@ -1,4 +1,4 @@
-# 65xx-kit
+# 6502-hello-world
 
 A repo with tools for aiding 65xx cpu development
 
