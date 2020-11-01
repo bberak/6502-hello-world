@@ -17,23 +17,16 @@ Firstly, clone the repo and configure it for git tracking:
 
 ```
 git clone https://github.com/bberak/65xx-kit.git [new-project]
-
 cd [new-project]
-
 rm -rf .git # Windows: rmdir /S .git
-
 git init
-
 git add .
-
 git commit -m "First commit"
-
 git remote add origin https://github.com/[you]/[new-project].git
-
 git push -u origin master
 ```
 
-Get tools:
+Install prerequisites:
 
 ```
 npm install
