@@ -11,7 +11,8 @@
     "build:darwin": "mkdir -p build && acme --cpu 6502 --format cbm",
     "build:win32": "(mkdir build) & acme --cpu 6502 --format cbm",
     "start": "x64sc",
-    "rom": "minipro -p AT28C256 -w"
+    "rom:gen":"node src/rom.js",
+    "rom:write": "minipro -p AT28C256 -w"
   },
   "repository": {
     "type": "git",
