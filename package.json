@@ -6,13 +6,14 @@
   "scripts": {
     "setup": "run-script-os",
     "setup:darwin": "brew install acme vice minipro && true",
-    "setup:win32": "choco install acme-assembler minipro -y -s \".\\tools\" && choco install winvice -y",
-    "build": "run-script-os",
-    "build:darwin": "mkdir -p build && acme --cpu 6502 --format cbm",
-    "build:win32": "(mkdir build) & acme --cpu 6502 --format cbm",
-    "start": "x64sc",
-    "rom:gen": "node src/rom.js",
-    "rom:write": "minipro -p AT28C256 -w"
+    "setup:win32": "choco install winvice -y",
+    "acme": "run-script-os",
+    "acme:darwin": "mkdir -p build && acme --cpu 6502 --format cbm",
+    "acme:win32": "(mkdir build) & tools\\acme-assembler\\acme.exe --cpu 6502 --format cbm",
+    "minipro": "run-script-os",
+    "minipro:darwin": "minipro -p AT28C256 -w",
+    "minipro:win32": "tools\\minipro\\minipro.exe -p AT28C256 -w",
+    "vice": "x64sc"
   },
   "repository": {
     "type": "git",
