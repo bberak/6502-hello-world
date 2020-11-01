@@ -1,7 +1,7 @@
 {
-  "name": "65xx-kit",
+  "name": "6502-hello-world",
   "version": "1.0.0",
-  "description": "A repo with tools for aiding 65xx cpu development",
+  "description": "A repo with tools for following along with with Ben Eater's 6502 series",
   "main": "index.js",
   "scripts": {
     "setup": "run-script-os",
@@ -17,14 +17,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bberak/65xx-kit.git"
+    "url": "git+https://github.com/bberak/6502-hello-world.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/bberak/65xx-kit/issues"
+    "url": "https://github.com/bberak6502-hello-world/issues"
   },
-  "homepage": "https://github.com/bberak/65xx-kit#readme",
+  "homepage": "https://github.com/bberak/6502-hello-world#readme",
   "devDependencies": {
     "run-script-os": "^1.1.1"
   }
