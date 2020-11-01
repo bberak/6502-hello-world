@@ -36,6 +36,7 @@ git push -u origin master
 Get tools:
 
 ```
+npm install
 npm run setup
 ```
 
