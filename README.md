@@ -13,17 +13,11 @@ A repo for holding my 6502 hello world code
 
 ## Getting Started
 
-Firstly, clone the repo and configure it for git tracking:
+Firstly, clone the repo:
 
 ```
-git clone https://github.com/bberak/65xx-kit.git [new-project]
-cd [new-project]
-rm -rf .git # Windows: rmdir /S .git
-git init
-git add .
-git commit -m "First commit"
-git remote add origin https://github.com/[you]/[new-project].git
-git push -u origin master
+git clone https://github.com/bberak/6502-hello-world.git
+cd 6502-hello-world
 ```
 
 Install prerequisites:
@@ -33,14 +27,14 @@ npm install
 npm run setup
 ```
 
-## Developing
+## Assembling
 
 Build assembler files with:
 
 ```
-npm run build src/file.asm
+npm run acme src/file.asm
 ```
-> By default used 6510 instruction set. Modify the `build` scripts in the `package.json` to change this.
+> By default using 6502 instruction set. Modify the `acme` scripts in the `package.json` to change this.
 
 By convention, .asm files should indicate their output paths using a macro at the top of the file:
 
@@ -48,26 +42,29 @@ By convention, .asm files should indicate their output paths using a macro at th
 !to "build/file.prg"
 ```
 
-After building is complete, you can run your program on the c64 emulator using:
+## Emulating
+
+After building is complete, you can run your program on the vice emulator using:
 
 ```
-npm run start build/file.prg
+npm run vice build/file.prg
 ```
 
-## Automatically starting programs
+## Writing to EEPROMs
 
-In order for the emulator to automatically begin executing your machine code, include the following lines at the start of your program:
+To write your program to a rom, run:
 
 ```
-*=$0801
-!byte $0E, $08, $0A, $00, $9E, $20, $28, $32
-!byte $30, $36, $34, $29, $00, $00, $00
-*=$0810  
+npm run minipro build/file.prg
 ```
 
-> This will insert a loader at the beginning of your program that will begin executing machine code from location $0810
+> Works with the MiniPRO TL866xx series of chip programmers
 
-## C64 / 6510 Syntax Highlighting
+> By default setup to write to the `AT28C256` rom chip. Modify the `minipro` scripts in the `package.json` to change this.
+
+> **IMPORTANT**: This has not beed tested yet!
+
+## 65xx Assembly Syntax Highlighting
 
 For syntax highlighting of the .asm files - use the [Kick Assembler Sumlime package](https://packagecontrol.io/packages/Kick%20Assembler%20(C64))
 
