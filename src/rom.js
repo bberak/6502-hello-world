@@ -1,8 +1,10 @@
-const fs = require("fs");
 const kb = 32 * 1024;
 const rom = Buffer.alloc(kb);
-const [out] = process.argv.reverse();
-const ws = fs.createWriteStream(out);
+const fs = require("fs");
+const path = require("path");
+const [outfile] = process.argv.reverse();
+const outfolder = fs.mkdirSync(path.dirname(outfile), { recursive: true });
+const ws = fs.createWriteStream(outfile);
 
 // Fill rom with no-op instructions
 rom.fill(0xea)
