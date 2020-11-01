@@ -13,6 +13,7 @@
     "minipro": "run-script-os",
     "minipro:darwin": "minipro -p AT28C256 -w",
     "minipro:win32": "tools\\minipro\\minipro.exe -p AT28C256 -w",
+    "rom": "node src/rom.js",
     "vice": "x64sc"
   },
   "repository": {
