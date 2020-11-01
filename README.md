@@ -34,7 +34,8 @@ Build assembler files with:
 ```
 npm run acme src/file.asm
 ```
-> By default using 6502 instruction set. Modify the `acme` scripts in the `package.json` to change this.
+
+> Defaults to using `6502` instruction set. Modify the `acme` scripts in the `package.json` to change this.
 
 By convention, .asm files should indicate their output paths using a macro at the top of the file:
 
@@ -42,15 +43,17 @@ By convention, .asm files should indicate their output paths using a macro at th
 !to "build/file.prg"
 ```
 
-## Emulating
+## Emulating (for Commodore 64 only)
 
-After building is complete, you can run your program on the vice emulator using:
+After assembling is complete, you can run your program on the vice emulator using:
 
 ```
 npm run vice build/file.prg
 ```
 
-## Writing to EEPROMs
+> You will most likely need to change the assembler instruction set to `6510` see above.
+
+## Writing to EEPROMs (Untested)
 
 To write your program to a rom, run:
 
@@ -60,9 +63,7 @@ npm run minipro build/file.prg
 
 > Works with the MiniPRO TL866xx series of chip programmers
 
-> By default setup to write to the `AT28C256` rom chip. Modify the `minipro` scripts in the `package.json` to change this.
-
-> **IMPORTANT**: This has not beed tested yet!
+> By default, is setup to write to the `AT28C256` rom chip. Modify the `minipro` scripts in the `package.json` to change this.
 
 ## 65xx Assembly Syntax Highlighting
 
