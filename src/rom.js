@@ -1,4 +1,4 @@
-const kb = 32 * 1024;
+ const kb = 32 * 1024;
 const rom = Buffer.alloc(kb);
 const fs = require("fs");
 const path = require("path");
@@ -26,7 +26,7 @@ const code = Buffer.from([
 	0xa9, 0xaa,			// Load aa into the acc
 	0x8d, 0x00, 0x60,	// Store contents of acc into address 6000 (port b of via chip)
 
-	0x4c, 0x05, 0x80		// Jump back to instruction on line 20
+	0x4c, 0x05, 0x80	// Jump back to instruction on line 20
 ])
 
 // Copy code into the start of the rom
