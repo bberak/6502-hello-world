@@ -18,53 +18,125 @@ init:
  lda #%11100000 ; Set top 3 pins on port A to output
  sta DDRA
 
-print:
  lda #%00111000 ; Set 8-bit mode; 2-line display; 5x8 font
  sta PORTB
 
- lda #0 		; Clear RS/RW/E bits
+ lda #E 		; Toggle E bit to send instruction
  sta PORTA
-
- lda #E 		; Set E bit to send instruction
- sta PORTA
-
- lda #0			; Clear RS/RW/E bits
+ lda #0	
  sta PORTA
 
  lda #%00001111 ; Display on; cursor on; blink on
  sta PORTB
 
- lda #0 		; Clear RS/RW/E bits
+ lda #E 		; Toggle E bit to send instruction
  sta PORTA
-
- lda #E 		; Set E bit to send instruction
- sta PORTA
-
- lda #0			; Clear RS/RW/E bits
+ lda #0	
  sta PORTA
 
  lda #%00000110 ; Increment cursor; no display shift
  sta PORTB
 
- lda #0 		; Clear RS/RW/E bits
+ lda #E 		; Toggle E bit to send instruction
+ sta PORTA
+ lda #0	
  sta PORTA
 
- lda #E 		; Set E bit to send instruction
- sta PORTA
-
- lda #0			; Clear RS/RW/E bits
- sta PORTA
-
- lda #$42		; Write ASCII character represented by hex 42 to the screen
+print:
+ lda #"H"		; Write ASCII character
  sta PORTB
 
- lda #RS 		; Set RS; Clear RW/E bits
+ lda #(RS | E) ; Toggle RS and E bits to write data
+ sta PORTA
+ lda #0
  sta PORTA
 
- lda #(RS | E) ; Set RS and E bits with bitwise or operation
+ lda #"e"		; Write ASCII character
+ sta PORTB
+
+ lda #(RS | E) ; Toggle RS and E bits to write data
+ sta PORTA
+ lda #0
  sta PORTA
 
- lda #RS 	   ; Set RS; Clear RW/E bits
+ lda #"l"		; Write ASCII character
+ sta PORTB
+
+ lda #(RS | E) ; Toggle RS and E bits to write data
+ sta PORTA
+ lda #0
+ sta PORTA
+
+ lda #"l"		; Write ASCII character
+ sta PORTB
+
+ lda #(RS | E) ; Toggle RS and E bits to write data
+ sta PORTA
+ lda #0
+ sta PORTA
+
+ lda #"o"		; Write ASCII character
+ sta PORTB
+
+ lda #(RS | E) ; Toggle RS and E bits to write data
+ sta PORTA
+ lda #0
+ sta PORTA
+
+ lda #" "		; Write ASCII character
+ sta PORTB
+
+ lda #(RS | E) ; Toggle RS and E bits to write data
+ sta PORTA
+ lda #0
+ sta PORTA
+
+ lda #"w"		; Write ASCII character
+ sta PORTB
+
+ lda #(RS | E) ; Toggle RS and E bits to write data
+ sta PORTA
+ lda #0
+ sta PORTA
+
+ lda #"o"		; Write ASCII character
+ sta PORTB
+
+ lda #(RS | E) ; Toggle RS and E bits to write data
+ sta PORTA
+ lda #0
+ sta PORTA
+
+ lda #"r"		; Write ASCII character
+ sta PORTB
+
+ lda #(RS | E) ; Toggle RS and E bits to write data
+ sta PORTA
+ lda #0
+ sta PORTA
+
+ lda #"l"		; Write ASCII character
+ sta PORTB
+
+ lda #(RS | E) ; Toggle RS and E bits to write data
+ sta PORTA
+ lda #0
+ sta PORTA
+
+ lda #"d"		; Write ASCII character
+ sta PORTB
+
+ lda #(RS | E) ; Toggle RS and E bits to write data
+ sta PORTA
+ lda #0
+ sta PORTA
+
+ lda #"!"		; Write ASCII character
+ sta PORTB
+
+ lda #(RS | E) ; Toggle RS and E bits to write data
+ sta PORTA
+ lda #0
  sta PORTA
 
 loop:
