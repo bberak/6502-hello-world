@@ -11,7 +11,10 @@ RS = %00100000
 
 *=$8000
 
-init:
+main:
+ ldx #$ff 		; Set stack pointer to address 01ff
+ txs
+
  lda #%11111111 ; Set all pins on port B to output
  sta DDRB
 
@@ -19,130 +22,84 @@ init:
  sta DDRA
 
  lda #%00111000 ; Set 8-bit mode; 2-line display; 5x8 font
- sta PORTB
+ jsr lcd_instruction
 
- lda #E 		; Toggle E bit to send instruction
- sta PORTA
- lda #0	
- sta PORTA
+ lda #%00000001 ; Clear display
+ jsr lcd_instruction
+
+ lda #%00000010 ; Return home
+ jsr lcd_instruction
 
  lda #%00001111 ; Display on; cursor on; blink on
- sta PORTB
-
- lda #E 		; Toggle E bit to send instruction
- sta PORTA
- lda #0	
- sta PORTA
+ jsr lcd_instruction
 
  lda #%00000110 ; Increment cursor; no display shift
- sta PORTB
+ jsr lcd_instruction
 
+ lda #"H"		; Print ASCII character
+ jsr print
+
+ lda #"e"		; Print ASCII character
+ jsr print
+
+ lda #"l"		; Print ASCII character
+ jsr print
+
+ lda #"l"		; Print ASCII character
+ jsr print
+
+ lda #"o"		; Print ASCII character
+ jsr print
+
+ lda #" "		; Print ASCII character
+ jsr print
+
+ lda #"w"		; Print ASCII character
+ jsr print
+
+ lda #"o"		; Print ASCII character
+ jsr print
+
+ lda #"r"		; Print ASCII character
+ jsr print
+
+ lda #"l"		; Print ASCII character
+ jsr print
+
+ lda #"d"		; Print ASCII character
+ jsr print
+
+ lda #" "		; Print ASCII character
+ jsr print
+
+ lda #"="		; Print ASCII character
+ jsr print
+
+ lda #")"		; Print ASCII character
+ jsr print
+
+ jmp loop
+
+lcd_instruction:
+ sta PORTB
  lda #E 		; Toggle E bit to send instruction
  sta PORTA
  lda #0	
  sta PORTA
+ rts
 
 print:
- lda #"H"		; Write ASCII character
  sta PORTB
-
  lda #(RS | E) ; Toggle RS and E bits to write data
  sta PORTA
  lda #0
  sta PORTA
-
- lda #"e"		; Write ASCII character
- sta PORTB
-
- lda #(RS | E) ; Toggle RS and E bits to write data
- sta PORTA
- lda #0
- sta PORTA
-
- lda #"l"		; Write ASCII character
- sta PORTB
-
- lda #(RS | E) ; Toggle RS and E bits to write data
- sta PORTA
- lda #0
- sta PORTA
-
- lda #"l"		; Write ASCII character
- sta PORTB
-
- lda #(RS | E) ; Toggle RS and E bits to write data
- sta PORTA
- lda #0
- sta PORTA
-
- lda #"o"		; Write ASCII character
- sta PORTB
-
- lda #(RS | E) ; Toggle RS and E bits to write data
- sta PORTA
- lda #0
- sta PORTA
-
- lda #" "		; Write ASCII character
- sta PORTB
-
- lda #(RS | E) ; Toggle RS and E bits to write data
- sta PORTA
- lda #0
- sta PORTA
-
- lda #"w"		; Write ASCII character
- sta PORTB
-
- lda #(RS | E) ; Toggle RS and E bits to write data
- sta PORTA
- lda #0
- sta PORTA
-
- lda #"o"		; Write ASCII character
- sta PORTB
-
- lda #(RS | E) ; Toggle RS and E bits to write data
- sta PORTA
- lda #0
- sta PORTA
-
- lda #"r"		; Write ASCII character
- sta PORTB
-
- lda #(RS | E) ; Toggle RS and E bits to write data
- sta PORTA
- lda #0
- sta PORTA
-
- lda #"l"		; Write ASCII character
- sta PORTB
-
- lda #(RS | E) ; Toggle RS and E bits to write data
- sta PORTA
- lda #0
- sta PORTA
-
- lda #"d"		; Write ASCII character
- sta PORTB
-
- lda #(RS | E) ; Toggle RS and E bits to write data
- sta PORTA
- lda #0
- sta PORTA
-
- lda #"!"		; Write ASCII character
- sta PORTB
-
- lda #(RS | E) ; Toggle RS and E bits to write data
- sta PORTA
- lda #0
- sta PORTA
+ rts
 
 loop:
  jmp loop
  
 *=$fffc
 
-!word init  ;; Set the program counter to the address of the init label
-!word $0000 ;; Some padding to fill the rest of the rom
+!word main 	   	; Set the program counter to the address of the main label
+!word $0000   	; Some padding to fill the rest of the rom
