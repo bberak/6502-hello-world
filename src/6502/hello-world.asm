@@ -78,7 +78,11 @@ main:
  lda #")"		; Print ASCII character
  jsr print
 
- jmp loop
+ lda #" "		; Print ASCII character
+ jsr print
+
+ ldx #00 
+ jmp print_ascii_table
 
 lcd_instruction:
  sta PORTB
@@ -96,8 +100,17 @@ print:
  sta PORTA
  rts
 
-loop:
- jmp loop
+print_ascii_table:
+ txa
+ jsr print 
+ inx
+ jmp print_ascii_table
+
+print_random_chars:
+ lda $00,x
+ jsr print 
+ inx
+ jmp print_random_chars
  
 *=$fffc
 
