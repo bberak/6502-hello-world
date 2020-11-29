@@ -36,53 +36,13 @@ main:
  lda #%00000110 ; Increment cursor; no display shift
  jsr lcd_instruction
 
- lda #"H"		; Print ASCII character
- jsr print
-
- lda #"e"		; Print ASCII character
- jsr print
-
- lda #"l"		; Print ASCII character
- jsr print
-
- lda #"l"		; Print ASCII character
- jsr print
-
- lda #"o"		; Print ASCII character
- jsr print
-
- lda #" "		; Print ASCII character
- jsr print
-
- lda #"w"		; Print ASCII character
- jsr print
-
- lda #"o"		; Print ASCII character
- jsr print
-
- lda #"r"		; Print ASCII character
- jsr print
-
- lda #"l"		; Print ASCII character
- jsr print
-
- lda #"d"		; Print ASCII character
- jsr print
-
- lda #" "		; Print ASCII character
- jsr print
-
- lda #"="		; Print ASCII character
- jsr print
-
- lda #")"		; Print ASCII character
- jsr print
+ jsr print_message
 
  lda #" "		; Print ASCII character
  jsr print
 
  ldx #00 
- jmp print_ascii_table
+ jmp print_ascii_table_forever
 
 lcd_instruction:
  jsr lcd_wait
@@ -103,17 +63,34 @@ print:
  jsr delay
  rts
 
-print_ascii_table:
+print_ascii_table_forever:
  txa
  jsr print 
  inx
- jmp print_ascii_table
+ jmp print_ascii_table_forever
 
-print_random_chars:
+print_random_chars_forever:
  lda $00,x
  jsr print 
  inx
- jmp print_random_chars
+ jmp print_random_chars_forever
+
+print_message:
+ pha
+ phx
+ ldx #0
+
+print_message_loop:
+ lda message,x
+ beq print_message_break
+ jsr print
+ inx
+ jmp print_message_loop
+
+print_message_break:
+ plx
+ pla
+ rts
 
 lcd_wait:
  pha
@@ -153,7 +130,13 @@ delay_break:
  plx
  rts
 
+message:
+!text "Hello world =)"
+!byte $00
+
 *=$fffc
 
 !word main 	   	; Set the program counter to the address of the main label
 !word $0000   	; Some padding to fill the rest of the rom
+
+
