@@ -1,4 +1,4 @@
-!to "build/90210.bin"
+!to "build/memory-manipulation.bin"
 
 ;;;;;;;;;;;;;;;;;;;
 ;;;; Constants ;;;;
@@ -13,8 +13,12 @@ E  = %10000000
 RW = %01000000
 RS = %00100000
 
-CMP_VAR = $0200
-MEM_START = $0201
+;;;;;;;;;;;;;;;;;;;
+;;;; Variables ;;;;
+;;;;;;;;;;;;;;;;;;;
+
+mem_cmp = $0200
+mem_start = mem_cmp + 1
 
 ;;;;;;;;;;;;;;;;
 ;;;; Offset ;;;;
@@ -37,33 +41,33 @@ main:
  clc
  lda #"0"		
  adc #9
- sta MEM_START + 0
+ sta mem_start + 0
 
  ; Save ASCII character
  clc
  lda #"0"		
  adc #0
- sta MEM_START + 1
+ sta mem_start + 1
  
  ; Save ASCII character
  clc
  lda #"0"		
  adc #2
- sta MEM_START + 2
+ sta mem_start + 2
 
  ; Save ASCII character
  clc
  lda #"0"		
  adc #1
- sta MEM_START + 3
+ sta mem_start + 3
 
  ; Save ASCII character
  clc
  lda #"0"		
  adc #0
- sta MEM_START + 4
+ sta mem_start + 4
 
- ; Print memory from MEM_START + x to MEM_START + y
+ ; Print memory from mem_start + x to mem_start + y
  ldx #0
  ldy #4
  jsr print_memory_from_x_to_y
@@ -77,13 +81,13 @@ main:
  lda #"."
  jsr print
 
- ; Fill memory from MEM_START + x to MEM_START + y with "z"
+ ; Fill memory from mem_start + x to mem_start + y with "z"
  lda #"z"
  ldx #120
  ldy #125
  jsr fill_memory_from_x_to_y
 
- ; Print memory from MEM_START + x to MEM_START + y
+ ; Print memory from mem_start + x to mem_start + y
  ldx #120
  ldy #125
  jsr print_memory_from_x_to_y
@@ -95,9 +99,9 @@ main:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 fill_memory_from_x_to_y:
- sta MEM_START,x
- stx CMP_VAR
- cpy CMP_VAR
+ sta mem_start,x
+ stx mem_cmp
+ cpy mem_cmp
  beq fill_complete
  inx
  jmp fill_memory_from_x_to_y
@@ -113,10 +117,10 @@ print_memory_from_x_to_y:
  pha
 
 print_start:
- lda MEM_START,x
+ lda mem_start,x
  jsr print
- stx CMP_VAR
- cpy CMP_VAR
+ stx mem_cmp
+ cpy mem_cmp
  beq print_complete
  inx
  jmp print_start
@@ -176,7 +180,7 @@ lcd_init:
  ; Set top 3 pins on port A to output
  lda #%11100000 
  sta DDRA
- 
+
  ; Set 8-bit mode; 2-line display; 5x8 font
  lda #%00111000 
  jsr lcd_instruction
@@ -251,9 +255,9 @@ delay_break:
 idle:
  jmp idle
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; Post-Instruction Memory ;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Post-Instruction ROM ;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 message:
 !text "Hello world =)"
@@ -265,9 +269,9 @@ message:
 
 *=$fffc
 
-;;;;;;;;;;;;;;;;;;;;
-;;;; EOF Memory ;;;;
-;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;
+;;;; EOF ROM ;;;;
+;;;;;;;;;;;;;;;;;
 
 !word main 	   	; Set the program counter to the address of the main label
 !word $0000   	; Some padding to fill the rest of the rom

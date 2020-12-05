@@ -1,4 +1,4 @@
-!to "build/division.bin"
+!to "build/binary-to-decimal.bin"
 
 ;;;;;;;;;;;;;;;;;;;
 ;;;; Constants ;;;;
@@ -13,8 +13,15 @@ E  = %10000000
 RW = %01000000
 RS = %00100000
 
-CMP_VAR = $0200
-MEM_START = $0201
+;;;;;;;;;;;;;;;;;;;
+;;;; Variables ;;;;
+;;;;;;;;;;;;;;;;;;;
+
+value = $0200
+mod_10 = value + 2
+
+mem_cmp = mod_10 + 2
+mem_start = mem_cmp + 1
 
 ;;;;;;;;;;;;;;;;
 ;;;; Offset ;;;;
@@ -32,7 +39,22 @@ main:
  txs
 
  jsr lcd_init
- 
+
+ lda binary_number
+ sta value
+ lda binary_number + 1
+ sta value + 1
+
+ lda #0
+ sta mod_10
+ sta mod_10 + 1
+
+ clc
+ rol value
+ rol value + 1
+ rol mod_10
+ rol mod_10 + 1
+
  jmp idle
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -40,9 +62,9 @@ main:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 fill_memory_from_x_to_y:
- sta MEM_START,x
- stx CMP_VAR
- cpy CMP_VAR
+ sta mem_start,x
+ stx mem_cmp
+ cpy mem_cmp
  beq fill_complete
  inx
  jmp fill_memory_from_x_to_y
@@ -58,10 +80,10 @@ print_memory_from_x_to_y:
  pha
 
 print_start:
- lda MEM_START,x
+ lda mem_start,x
  jsr print
- stx CMP_VAR
- cpy CMP_VAR
+ stx mem_cmp
+ cpy mem_cmp
  beq print_complete
  inx
  jmp print_start
@@ -196,13 +218,16 @@ delay_break:
 idle:
  jmp idle
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; Post-Instruction Memory ;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Post-Instruction ROM ;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 message:
 !text "Hello world =)"
 !byte $00
+
+binary_number:
+!word 1729
 
 ;;;;;;;;;;;;;;;;
 ;;;; Offset ;;;;
@@ -210,9 +235,9 @@ message:
 
 *=$fffc
 
-;;;;;;;;;;;;;;;;;;;;
-;;;; EOF Memory ;;;;
-;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;
+;;;; EOF ROM ;;;;
+;;;;;;;;;;;;;;;;;
 
 !word main 	   	; Set the program counter to the address of the main label
 !word $0000   	; Some padding to fill the rest of the rom
