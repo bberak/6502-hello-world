@@ -19,8 +19,9 @@ RS = %00100000
 
 value = $0200
 mod_10 = value + 2
+message = mod_10 + 2
 
-mem_cmp = mod_10 + 2
+mem_cmp = message + 6
 mem_start = mem_cmp + 1
 
 ;;;;;;;;;;;;;;;;
@@ -40,21 +41,63 @@ main:
 
  jsr lcd_init
 
+ ; Initialize value to be the number to convert
  lda binary_number
  sta value
  lda binary_number + 1
  sta value + 1
 
+ ; Initialize message
+ lda #0
+ sta message
+
+divide:
+ ; Initialize the remainder to zero
  lda #0
  sta mod_10
  sta mod_10 + 1
 
- clc
+ ldx #16
+ clc 
+
+division_loop:
+ ; Rotate dividend and remainder
  rol value
  rol value + 1
  rol mod_10
  rol mod_10 + 1
 
+ ; a,y = dividend - divisor
+ sec
+ lda mod_10
+ sbc #10
+ tay ; Save low byte to Y register
+ lda mod_10 + 1
+ sbc #0
+ bcc ignore_result
+ sty mod_10
+ sta mod_10 + 1
+
+ignore_result:
+ dex 
+ bne division_loop
+
+ ; Shift carry bit into value
+ rol value
+ rol value + 1
+
+print_remainder:
+ clc
+ lda mod_10
+ adc #"0"
+ jsr push_char
+
+ ; If value is not zero, continue dividing (via shift and subtraction)
+ lda value
+ ora value + 1
+ bne divide
+
+ jsr print_message
  jmp idle
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -129,6 +172,29 @@ print_message_loop:
 print_message_break:
  plx
  pla
+ rts
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; String Utilities ;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; Add the character in the A register to the beginning
+; of the null-terminated string `message`
+push_char:
+ ldy #0 ; Set character index to zero
+ 
+push_char_loop:
+ pha ; Push new character onto the stack
+ lda message,y ; Get character at index and push it into X register
+ tax 
+ pla ; Pop new character off the stack
+ sta message,y ; Store new character at the current index
+ beq push_char_break
+ iny ; Increment index
+ txa ; Move previous character into A register
+ jmp push_char_loop
+
+push_char_break:
  rts
 
 ;;;;;;;;;;;;;;;;;;;;;;
@@ -221,10 +287,6 @@ idle:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Post-Instruction ROM ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-message:
-!text "Hello world =)"
-!byte $00
 
 binary_number:
 !word 1729
