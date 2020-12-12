@@ -206,6 +206,8 @@ push_char_loop:
 push_char_break:
  rts
 
+; Convert the `number` variable to a sequence of
+; characters and store them in the `string` variable
 to_string:
  ; Initialize string
  lda #0
@@ -217,7 +219,7 @@ to_string_divide:
  sta mod_10
  sta mod_10 + 1
 
- ; Initialize X register to 16 as a count (for processing 2-byte numbers)
+ ; Initialize X register to 16 as a counter (for processing 2-byte numbers)
  ldx #16
  clc 
 

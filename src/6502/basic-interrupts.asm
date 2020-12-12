@@ -63,16 +63,19 @@ main:
 
 nmi:
 irq:
+ ; Increment counter
  inc counter
  bne irq_print
  inc counter + 1
 
 irq_print:
+ ; Move counter into number
  lda counter
  sta number
  lda counter + 1
  sta number + 1
 
+ ; Convert number to a string then print
  jsr to_string
  jsr print_string
 
@@ -178,6 +181,8 @@ push_char_loop:
 push_char_break:
  rts
 
+; Convert the `number` variable to a sequence of
+; characters and store them in the `string` variable
 to_string:
  ; Initialize string
  lda #0
@@ -189,7 +194,7 @@ to_string_divide:
  sta mod_10
  sta mod_10 + 1
 
- ; Initialize X register to 16 as a count (for processing 2-byte numbers)
+ ; Initialize X register to 16 as a counter (for processing 2-byte numbers)
  ldx #16
  clc 
 
