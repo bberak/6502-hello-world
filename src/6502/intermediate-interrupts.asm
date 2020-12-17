@@ -1,4 +1,4 @@
-!to "build/binary-to-decimal.bin"
+!to "build/intermediate-interrupts.bin"
 
 ;;;;;;;;;;;;;;;;
 ;;;; Offset ;;;;
@@ -27,12 +27,17 @@ PORTB = $6000
 PORTA = $6001
 DDRB  = $6002
 DDRA  = $6003
+PCR = $600c
+IFR = $600d
+IER = $600e
 
 E  = %10000000
 RW = %01000000
 RS = %00100000
 
-number = $0200
+counter = $0200
+
+number = counter + 2
 mod_10 = number + 2
 string = mod_10 + 2
 
@@ -50,64 +55,49 @@ main:
 
  jsr lcd_init
 
-main_loop:
- ; Load year_1 into number
- lda year_1
+ ; Enable interrupts for pin CA1 of the 65c22 chip
+ lda #%10000010
+ sta IER
+
+ ; Set interrupts to fire on the low-to-high edge of pin CA1
+ lda #%00000000
+ sta PCR
+
+ cli ; Enable interrupts
+
+ ; Set counter to zero
+ lda #0
+ sta counter
+ sta counter + 1
+
+ jsr idle
+
+nmi:
+irq:
+ ; Increment counter
+ inc counter
+ bne irq_print
+ inc counter + 1
+
+irq_print:
+ ; Move counter into number
+ lda counter
  sta number
- lda year_1 + 1
+ lda counter + 1
  sta number + 1
 
- ; Convert number to string and print
+ ; Convert number to a string then print
  jsr to_string
  jsr print_string
 
- jsr delay
- jsr lcd_clear
- jsr lcd_return
- 
- ; Load year_2 into number
- lda year_2
- sta number
- lda year_2 + 1
- sta number + 1
+ lda #" "
+ jsr print
 
- ; Convert number to string and print
- jsr to_string
- jsr print_string
+ ; Read PORTA on the 65c22 to clear the interrupt
+ ; This will cause the 65c22 to set the IRQB pin high
+ bit PORTA 
 
- jsr delay
- jsr lcd_clear
- jsr lcd_return
-
- ; Load year_3 into number
- lda year_3
- sta number
- lda year_3 + 1
- sta number + 1
-
- ; Convert number to string and print
- jsr to_string
- jsr print_string
-
- jsr delay
- jsr lcd_clear
- jsr lcd_return
-
- ; Load literal 07c3 (1987) into number
- lda #$c3
- sta number
- lda #$07
- sta number + 1
-
- ; Convert number to string and print
- jsr to_string
- jsr print_string
-
- jsr delay
- jsr lcd_clear
- jsr lcd_return
-
- jmp main_loop
+ rti
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Memory Utilities ;;;;
@@ -354,11 +344,12 @@ idle:
 ;;;; Offset ;;;;
 ;;;;;;;;;;;;;;;;
 
-*=$fffc
+*=$fffa
 
 ;;;;;;;;;;;;;;
 ;;;; Data ;;;;
 ;;;;;;;;;;;;;;
 
-!word main 	   	; Set the program counter to the address of the main label
-!word $0000   	; Some padding to fill the rest of the rom
+!word nmi ; NMI interrupt handler
+!word main ; Set the program counter to the address of the main label
+!word irq ; IRQ interrupt handler

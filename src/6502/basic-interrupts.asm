@@ -6,18 +6,9 @@
 
 *=$8000
 
-;;;;;;;;;;;;;;;;;;;
-;;;; Constants ;;;;
-;;;;;;;;;;;;;;;;;;;
-
-PORTB = $6000
-PORTA = $6001
-DDRB  = $6002
-DDRA  = $6003
-
-E  = %10000000
-RW = %01000000
-RS = %00100000
+;;;;;;;;;;;;;;
+;;;; Data ;;;;
+;;;;;;;;;;;;;;
 
 year_1:
 !word 1955
@@ -31,6 +22,15 @@ year_3
 ;;;;;;;;;;;;;;;;;;;
 ;;;; Variables ;;;;
 ;;;;;;;;;;;;;;;;;;;
+
+PORTB = $6000
+PORTA = $6001
+DDRB  = $6002
+DDRA  = $6003
+
+E  = %10000000
+RW = %01000000
+RS = %00100000
 
 counter = $0200
 
@@ -263,7 +263,6 @@ lcd_init:
 
  jsr lcd_clear
  jsr lcd_return
-
  rts
 
 lcd_clear:
@@ -310,20 +309,16 @@ lcd_wait_busy:
 delay:
  phx
  phy
- ldx #127
+ ldx #255
+ ldy #127
 
-delay_x_loop:
- ldy #0
- inx
- beq delay_break
+delay_loop:
+ dex
+ bne delay_loop
+ dey 
+ bne delay_loop
 
-delay_y_loop:
- iny
- beq delay_x_loop
- jmp delay_y_loop
-
-delay_break:
- ply
+ ply 
  plx
  rts
 
@@ -336,9 +331,9 @@ idle:
 
 *=$fffa
 
-;;;;;;;;;;;;;;;;;
-;;;; EOF ROM ;;;;
-;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;
+;;;; Data ;;;;
+;;;;;;;;;;;;;;
 
 !word nmi ; NMI interrupt handler
 !word main ; Set the program counter to the address of the main label
