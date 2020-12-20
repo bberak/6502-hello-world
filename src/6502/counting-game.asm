@@ -152,32 +152,33 @@ irq:
  ; Avoid button bounce
  jsr delay
 
- ; Determine source of interrupt
- ; This will also clear the interrupt by causing
- ; the 65c22 to set the IRQB pin high
+ ; Determine the source of the interrupt
  pha
- lda PORTA
- ora #%11111100
+ lda IFR
+ and #%10000011
 
-if_a0_low:
- cmp #%11111110
- bne else_if_a1_low
- jsr increment_player_1_counter 
- jmp irq_break
-
-else_if_a1_low:
- cmp #%11111101
- bne else_if_a0_and_a1_low
+if_ca2_high:
+ cmp #%10000001
+ bne else_if_ca1_high
  jsr increment_player_2_counter 
  jmp irq_break
 
-else_if_a0_and_a1_low:
- cmp #%11111100
+else_if_ca1_high:
+ cmp #%10000010
+ bne else_if_ca1_and_ca2_high
+ jsr increment_player_1_counter 
+ jmp irq_break
+
+else_if_ca1_and_ca2_high:
+ cmp #%10000011
  bne irq_break
  jsr increment_player_1_counter 
  jsr increment_player_2_counter 
 
 irq_break:
+ ; Clear the interrupt by reading PORTA
+ ; This will cause the 65c22 to set the IRQB pin high
+ lda PORTA
  pla
  rti
 
