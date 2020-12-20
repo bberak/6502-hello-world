@@ -35,11 +35,9 @@ PORTB = $6000
 PORTA = $6001
 DDRB  = $6002
 DDRA  = $6003
-ACR = $600b
 PCR = $600c
 IFR = $600d
 IER = $600e
-PORTA_NO_HANDSHAKE = $600f
 
 E  = %10000000
 RW = %01000000
@@ -68,17 +66,13 @@ main:
 
  jsr lcd_init
 
- ; Enable interrupts for pin CA1 of the 65c22 chip
- lda #%10000010
+ ; Enable interrupts for pins CA1 and CA2 of the 65c22 chip
+ lda #%10000011
  sta IER
 
- ; Set interrupts to fire on the low-to-high transtion (positive active edge) of pin CA1
- lda #%00000001
+ ; Set interrupts to fire on the high-to-low transition (negative active edge) of pins CA1 and CA2
+ lda #%00000000
  sta PCR
-
- ; Disable latching
- ; lda #%00000000
- ; sta ACR
 
  cli ; Enable interrupts
 
