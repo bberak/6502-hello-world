@@ -59,7 +59,7 @@ main:
  lda #%10000010
  sta IER
 
- ; Set interrupts to fire on the low-to-high edge of pin CA1
+ ; Set interrupts to fire on the high-to-low transition (negative active edge) of pin CA1
  lda #%00000000
  sta PCR
 

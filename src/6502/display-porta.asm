@@ -1,4 +1,4 @@
-!to "build/counting-game.bin"
+!to "build/display-porta.bin"
 
 ;;;;;;;;;;;;;;;;
 ;;;; Offset ;;;;
@@ -68,74 +68,18 @@ main:
 
  jsr lcd_init
 
- ; Enable interrupts for pin CA1 of the 65c22 chip
- lda #%10000010
- sta IER
-
- ; Set interrupts to fire on the low-to-high transtion (positive active edge) of pin CA1
- lda #%00000001
- sta PCR
-
- ; Disable latching
- ; lda #%00000000
- ; sta ACR
-
- cli ; Enable interrupts
-
- ; Set counters to zero
+main_loop:
+ lda PORTA
+ ora #%11111100
+ sta number
  lda #0
- sta player_1_counter
- sta player_1_counter + 1
- sta player_2_counter
- sta player_2_counter + 1
-
-game_loop:
- ; Print player 1
- lda #<player_1_label ; Load the lsb of the address aliased by player_1_label
- sta string_ptr
- lda #>player_1_label ; Load the msb of the address aliased by player_1_label
- sta string_ptr + 1
- jsr print_string_ptr
-
- lda #" "
- jsr print
-
- ; Move counter into number
- lda player_1_counter
- sta number
- lda player_1_counter + 1
  sta number + 1
 
- ; Convert number to a string then print
- jsr number_to_string
- jsr print_string
-
- lda #" "
- jsr print
-
- ; Print player 2
- lda #<player_2_label ; Load the lsb of the address aliased by player_2_label
- sta string_ptr
- lda #>player_2_label ; Load the msb of the address aliased by player_2_label
- sta string_ptr + 1
- jsr print_string_ptr
-
- lda #" "
- jsr print
-
- ; Move counter into number
- lda player_2_counter
- sta number
- lda player_2_counter + 1
- sta number + 1
-
- ; Convert number to a string then print
  jsr number_to_string
  jsr print_string
 
  jsr lcd_return
-
- jmp game_loop
+ jmp main_loop
 
 increment_player_1_counter:
  inc player_1_counter
