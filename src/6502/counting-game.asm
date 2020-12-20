@@ -35,9 +35,11 @@ PORTB = $6000
 PORTA = $6001
 DDRB  = $6002
 DDRA  = $6003
+ACR = $600b
 PCR = $600c
 IFR = $600d
 IER = $600e
+PORTA_NO_HANDSHAKE = $600f
 
 E  = %10000000
 RW = %01000000
@@ -74,24 +76,21 @@ main:
  lda #%00000000
  sta PCR
 
+ ; Disable latching
+ ; lda #%00000000
+ ; sta ACR
+
  cli ; Enable interrupts
 
  ; Set counters to zero
  lda #0
  sta player_1_counter
  sta player_1_counter + 1
+ sta player_2_counter
+ sta player_2_counter + 1
 
- jsr idle
-
-nmi:
-irq:
- ; Increment counter
- inc player_1_counter
- bne irq_print
- inc player_1_counter + 1
-
-irq_print:
- ; Print player
+game_loop:
+ ; Print player 1
  lda #<player_1_label ; Load the lsb of the address aliased by player_1_label
  sta string_ptr
  lda #>player_1_label ; Load the msb of the address aliased by player_1_label
@@ -108,16 +107,84 @@ irq_print:
  sta number + 1
 
  ; Convert number to a string then print
- jsr to_string
+ jsr number_to_string
  jsr print_string
 
  lda #" "
  jsr print
 
- ; Read PORTA on the 65c22 to clear the interrupt
- ; This will cause the 65c22 to set the IRQB pin high
- bit PORTA 
+ ; Print player 2
+ lda #<player_2_label ; Load the lsb of the address aliased by player_2_label
+ sta string_ptr
+ lda #>player_2_label ; Load the msb of the address aliased by player_2_label
+ sta string_ptr + 1
+ jsr print_string_ptr
 
+ lda #" "
+ jsr print
+
+ ; Move counter into number
+ lda player_2_counter
+ sta number
+ lda player_2_counter + 1
+ sta number + 1
+
+ ; Convert number to a string then print
+ jsr number_to_string
+ jsr print_string
+
+ jsr lcd_return
+
+ jmp game_loop
+
+increment_player_1_counter:
+ inc player_1_counter
+ bne increment_player_1_counter_break
+ inc player_1_counter + 1
+
+increment_player_1_counter_break:
+ rts
+
+increment_player_2_counter:
+ inc player_2_counter
+ bne increment_player_2_counter_break
+ inc player_2_counter + 1
+
+increment_player_2_counter_break:
+ rts
+
+nmi:
+irq:
+ ; Avoid button bounce
+ jsr delay
+
+ ; Determine source of interrupt
+ ; This will also clear the interrupt by causing
+ ; the 65c22 to set the IRQB pin high
+ pha
+ lda PORTA
+ ora #%11111100
+
+if_a0_low:
+ cmp #%11111110
+ bne else_if_a1_low
+ jsr increment_player_1_counter 
+ jmp irq_break
+
+else_if_a1_low:
+ cmp #%11111101
+ bne else_if_a0_and_a1_low
+ jsr increment_player_2_counter 
+ jmp irq_break
+
+else_if_a0_and_a1_low:
+ cmp #%11111100
+ bne irq_break
+ jsr increment_player_1_counter 
+ jsr increment_player_2_counter 
+
+irq_break:
+ pla
  rti
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -146,7 +213,6 @@ print:
  sta PORTA
  lda #0
  sta PORTA
- jsr delay
  rts
 
 print_memory_from_x_to_y:
@@ -236,12 +302,12 @@ push_char_break:
 
 ; Convert the `number` variable to a sequence of
 ; characters and store them in the `string` variable
-to_string:
+number_to_string:
  ; Initialize string
  lda #0
  sta string
 
-to_string_divide:
+number_to_string_divide:
  ; Initialize the remainder to zero
  lda #0
  sta mod_10
@@ -251,7 +317,7 @@ to_string_divide:
  ldx #16
  clc 
 
-to_string_division_loop:
+number_to_string_division_loop:
  ; Rotate dividend and remainder
  rol number
  rol number + 1
@@ -265,19 +331,19 @@ to_string_division_loop:
  tay ; Save low byte to Y register
  lda mod_10 + 1
  sbc #0
- bcc to_string_ignore_result
+ bcc number_to_string_ignore_result
  sty mod_10
  sta mod_10 + 1
 
-to_string_ignore_result:
+number_to_string_ignore_result:
  dex 
- bne to_string_division_loop
+ bne number_to_string_division_loop
 
  ; Shift carry bit into number
  rol number
  rol number + 1
 
-to_string_save_remainder:
+number_to_string_save_remainder:
  clc
  lda mod_10
  adc #"0"
@@ -286,7 +352,7 @@ to_string_save_remainder:
  ; If number is not zero, continue dividing (via shift and subtraction)
  lda number
  ora number + 1
- bne to_string_divide
+ bne number_to_string_divide
  rts
 
 ;;;;;;;;;;;;;;;;;;;;;;
@@ -306,8 +372,8 @@ lcd_init:
  lda #%00111000 
  jsr lcd_instruction
 
- ; Display on; cursor on; blink on
- lda #%00001111 
+ ; Display on; cursor off; blink off
+ lda #%00001100 
  jsr lcd_instruction
 
  ; Increment cursor; no display shift
@@ -363,7 +429,7 @@ delay:
  phx
  phy
  ldx #255
- ldy #127
+ ldy #40
 
 delay_loop:
  dex
