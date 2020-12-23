@@ -47,8 +47,9 @@ string_ptr = $86
 
 player_1_counter = $0200
 player_2_counter = player_1_counter + 2
+prev_porta = player_2_counter + 2
 
-number = player_2_counter + 2
+number = prev_porta + 1
 mod_10 = number + 2
 string = mod_10 + 2
 
@@ -82,8 +83,11 @@ main:
  sta player_1_counter + 1
  sta player_2_counter
  sta player_2_counter + 1
+ sta prev_porta
 
 game_loop:
+ jsr count_presses
+
  ; Print player 1
  lda #<player_1_label ; Load the lsb of the address aliased by player_1_label
  sta string_ptr
@@ -123,13 +127,59 @@ game_loop:
  lda player_2_counter + 1
  sta number + 1
 
- ; Convert number to a string then print
+ ; Print and repeat
  jsr number_to_string
  jsr print_string
-
  jsr lcd_return
-
  jmp game_loop
+
+count_presses:
+ pha
+ phx
+ phy
+
+ ; Normalize data from porta and save to x register
+ lda PORTA
+ and #%00000011
+ tax
+
+ ; Load y register with `prev_porta`
+ ldy prev_porta
+
+count_presses_compare_first_bit:
+ tya
+ and #%00000001
+ sta prev_porta
+
+ txa
+ and #%00000001
+ cmp prev_porta
+
+ beq count_presses_compare_second_bit
+ bmi count_presses_compare_second_bit
+ jsr increment_player_1_counter
+
+count_presses_compare_second_bit:
+ tya
+ and #%00000010
+ sta prev_porta
+
+ txa
+ and #%00000010
+ cmp prev_porta
+
+ beq count_presses_break
+ bmi count_presses_break
+ jsr increment_player_2_counter
+
+count_presses_break:
+ ; Store normalized porta data into `prev_porta`
+ stx prev_porta
+
+ ply
+ plx
+ pla
+ rts
 
 increment_player_1_counter:
  inc player_1_counter

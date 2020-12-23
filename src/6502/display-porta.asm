@@ -39,7 +39,6 @@ ACR = $600b
 PCR = $600c
 IFR = $600d
 IER = $600e
-PORTA_NO_HANDSHAKE = $600f
 
 E  = %10000000
 RW = %01000000
@@ -70,7 +69,7 @@ main:
 
 main_loop:
  lda PORTA
- ora #%11111100
+ and #%00000011
  sta number
  lda #0
  sta number + 1
