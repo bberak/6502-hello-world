@@ -1,4 +1,4 @@
-!to "build/display-porta.bin"
+!to "build/timer.bin"
 
 ;;;;;;;;;;;;;;;;
 ;;;; Offset ;;;;
@@ -35,6 +35,8 @@ PORTB = $6000
 PORTA = $6001
 DDRB  = $6002
 DDRA  = $6003
+T1_LC = $6004
+T1_HC = $6005
 ACR = $600b
 PCR = $600c
 IFR = $600d
@@ -46,10 +48,10 @@ RS = %00100000
 
 string_ptr = $86
 
-player_1_counter = $0200
-player_2_counter = player_1_counter + 2
+counter = $0200
+counter_lock = counter + 2
 
-number = player_2_counter + 2
+number = counter_lock + 1
 mod_10 = number + 2
 string = mod_10 + 2
 
@@ -67,18 +69,57 @@ main:
 
  jsr lcd_init
 
-main_loop:
- lda PORTA
- and #%00000011
- sta number
+ ; Enable interrupts for timer 1
+ lda #%11000000
+ sta IER
+
+ lda #%11000000; Countinuous timer interrupts (intervals) with output on PB7
+ sta ACR
+
+ ; Load timer 1 with $ffff to initiate countdown
+ lda #$ff
+ sta T1_LC
+ sta T1_HC
+
+ ; Set counter to zero
  lda #0
+ sta counter
+ sta counter + 1
+
+ cli ; Enable interrupts
+
+main_loop:
+ ;lda #1
+ ;sta counter_lock
+
+ lda counter
+ sta number
+ lda counter + 1
  sta number + 1
 
+ ;lda #0
+ ;sta counter_lock
+ 
  jsr number_to_string
  jsr print_string
 
  jsr lcd_return
  jmp main_loop
+
+nmi:
+irq:
+ bit T1_LC ; Clear the interrupt by reading low order timer count
+ ;pha
+ ;lda counter_lock
+ ;bne irq_break
+
+ inc counter
+ bne irq_break
+ inc counter + 1
+
+irq_break:
+ ;pla
+ rti
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Memory Utilities ;;;;
@@ -261,6 +302,7 @@ number_to_string_save_remainder:
 ;;;;;;;;;;;;;;;;;;;;;;
 
 lcd_init:
+ pha
  ; Set all pins on port B to output
  lda #%11111111 
  sta DDRB
@@ -283,25 +325,32 @@ lcd_init:
 
  jsr lcd_clear
  jsr lcd_return
+ pla
  rts
 
 lcd_clear:
+ pha
  lda #%00000001 
  jsr lcd_instruction
+ pla
  rts
 
 lcd_return:
+ pha
  lda #%00000010 
  jsr lcd_instruction
+ pla
  rts
 
 lcd_instruction:
+ pha
  jsr lcd_wait
  sta PORTB
  lda #E ; Toggle E bit to send instruction
  sta PORTA
  lda #0	
  sta PORTA
+ pla
  rts
 
 lcd_wait:

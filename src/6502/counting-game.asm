@@ -67,13 +67,9 @@ main:
 
  jsr lcd_init
 
- ; Enable interrupts for pins CA1 and CA2 of the 65c22 chip
- lda #%10000011
+ ; Enable interrupts for timer 1
+ lda #%11000000
  sta IER
-
- ; Set interrupts to fire on the high-to-low transition (negative active edge) of pins CA1 and CA2
- lda #%00000000
- sta PCR
 
  cli ; Enable interrupts
 
@@ -87,6 +83,12 @@ main:
 
 game_loop:
  jsr count_presses
+ jsr print_presses
+ jsr lcd_return
+ jmp game_loop
+
+print_presses:
+ pha
 
  ; Print player 1
  lda #<player_1_label ; Load the lsb of the address aliased by player_1_label
@@ -127,11 +129,10 @@ game_loop:
  lda player_2_counter + 1
  sta number + 1
 
- ; Print and repeat
  jsr number_to_string
  jsr print_string
- jsr lcd_return
- jmp game_loop
+ pla
+ rts
 
 count_presses:
  pha
@@ -348,6 +349,10 @@ push_char_break:
 ; Convert the `number` variable to a sequence of
 ; characters and store them in the `string` variable
 number_to_string:
+ pha
+ phx
+ phy
+
  ; Initialize string
  lda #0
  sta string
@@ -398,6 +403,10 @@ number_to_string_save_remainder:
  lda number
  ora number + 1
  bne number_to_string_divide
+ 
+ ply
+ plx
+ pla
  rts
 
 ;;;;;;;;;;;;;;;;;;;;;;
