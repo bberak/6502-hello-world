@@ -49,9 +49,8 @@ RS = %00100000
 string_ptr = $86
 
 counter = $0200
-counter_lock = counter + 2
 
-number = counter_lock + 1
+number = counter + 2
 mod_10 = number + 2
 string = mod_10 + 2
 
@@ -89,16 +88,10 @@ main:
  cli ; Enable interrupts
 
 main_loop:
- ;lda #1
- ;sta counter_lock
-
  lda counter
  sta number
  lda counter + 1
  sta number + 1
-
- ;lda #0
- ;sta counter_lock
  
  jsr number_to_string
  jsr print_string
@@ -109,16 +102,12 @@ main_loop:
 nmi:
 irq:
  bit T1_LC ; Clear the interrupt by reading low order timer count
- ;pha
- ;lda counter_lock
- ;bne irq_break
-
+ 
  inc counter
  bne irq_break
  inc counter + 1
 
 irq_break:
- ;pla
  rti
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
