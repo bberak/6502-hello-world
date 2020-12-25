@@ -20,11 +20,15 @@ year_3:
 !word 1982
 
 player_1_label:
-!text "P1:"
+!text "P1: "
 !byte $00
 
 player_2_label:
-!text "P2:"
+!text "P2: "
+!byte $00
+
+timer_label:
+!text "Countdown: "
 !byte $00
 
 ;;;;;;;;;;;;;;;;;;;
@@ -42,14 +46,16 @@ IER = $600e
 E  = %10000000
 RW = %01000000
 RS = %00100000
+SCREEN_WIDTH = 42
 
 string_ptr = $86
 
 player_1_counter = $0200
 player_2_counter = player_1_counter + 2
 prev_porta = player_2_counter + 2
+char_index = prev_porta + 1
 
-number = prev_porta + 1
+number = char_index + 1
 mod_10 = number + 2
 string = mod_10 + 2
 
@@ -67,12 +73,6 @@ main:
 
  jsr lcd_init
 
- ; Enable interrupts for timer 1
- lda #%11000000
- sta IER
-
- cli ; Enable interrupts
-
  ; Set counters to zero
  lda #0
  sta player_1_counter
@@ -84,6 +84,14 @@ main:
 game_loop:
  jsr count_presses
  jsr print_presses
+ jsr lcd_nextline
+
+ lda #<timer_label
+ sta string_ptr
+ lda #>timer_label
+ sta string_ptr + 1
+ jsr print_string_ptr
+
  jsr lcd_return
  jmp game_loop
 
@@ -96,9 +104,6 @@ print_presses:
  lda #>player_1_label ; Load the msb of the address aliased by player_1_label
  sta string_ptr + 1
  jsr print_string_ptr
-
- lda #" "
- jsr print
 
  ; Move counter into number
  lda player_1_counter
@@ -119,9 +124,6 @@ print_presses:
  lda #>player_2_label ; Load the msb of the address aliased by player_2_label
  sta string_ptr + 1
  jsr print_string_ptr
-
- lda #" "
- jsr print
 
  ; Move counter into number
  lda player_2_counter
@@ -200,37 +202,7 @@ increment_player_2_counter_break:
 
 nmi:
 irq:
- ; Avoid button bounce
- jsr delay
-
- ; Determine the source of the interrupt
- pha
- lda IFR
- and #%10000011
-
-if_ca2_high:
- cmp #%10000001
- bne else_if_ca1_high
- jsr increment_player_2_counter 
- jmp irq_break
-
-else_if_ca1_high:
- cmp #%10000010
- bne else_if_ca1_and_ca2_high
- jsr increment_player_1_counter 
- jmp irq_break
-
-else_if_ca1_and_ca2_high:
- cmp #%10000011
- bne irq_break
- jsr increment_player_1_counter 
- jsr increment_player_2_counter 
-
-irq_break:
- ; Clear the interrupt by reading PORTA
- ; This will cause the 65c22 to set the IRQB pin high
- lda PORTA
- pla
+ nop
  rti
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -253,12 +225,15 @@ fill_memory_from_x_to_y_complete:
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 
 print:
+ phx
  jsr lcd_wait
  sta PORTB
- lda #(RS | E) ; Toggle RS and E bits to write data
- sta PORTA
- lda #0
- sta PORTA
+ ldx #(RS | E) ; Toggle RS and E bits to write data
+ stx PORTA
+ ldx #0
+ stx PORTA
+ inc char_index
+ plx
  rts
 
 print_memory_from_x_to_y:
@@ -414,6 +389,7 @@ number_to_string_save_remainder:
 ;;;;;;;;;;;;;;;;;;;;;;
 
 lcd_init:
+ pha
  ; Set all pins on port B to output
  lda #%11111111 
  sta DDRB
@@ -436,25 +412,34 @@ lcd_init:
 
  jsr lcd_clear
  jsr lcd_return
+ pla
  rts
 
 lcd_clear:
+ pha
  lda #%00000001 
  jsr lcd_instruction
+ pla
  rts
 
 lcd_return:
+ pha
  lda #%00000010 
  jsr lcd_instruction
+ lda #0
+ sta char_index
+ pla
  rts
 
 lcd_instruction:
+ pha
  jsr lcd_wait
  sta PORTB
  lda #E ; Toggle E bit to send instruction
  sta PORTA
  lda #0	
  sta PORTA
+ pla
  rts
 
 lcd_wait:
@@ -472,6 +457,47 @@ lcd_wait_busy:
  bne lcd_wait_busy
  lda #%11111111 ; Set all pins on port B to output
  sta DDRB
+ pla
+ rts
+
+lcd_nextline:
+ ;pha
+ ;lda #"."
+ ;jsr print
+ ;jsr print 
+ ;jsr print 
+ ;pla
+ ;rts
+
+ pha
+ phx
+ php
+ clc
+ lda #SCREEN_WIDTH
+ sbc char_index
+ 
+ ;sta number
+ ;lda #0
+ ;sta number + 1
+ ;jsr number_to_string
+ ;jsr print_string
+
+ ;lda #32
+
+lcd_nextline_loop: 
+ sbc #1
+ beq lcd_nextline_break
+ tax
+ lda #" "
+ jsr print
+ txa
+ jmp lcd_nextline_loop
+
+lcd_nextline_break:
+ lda #0
+ sta char_index
+ plp
+ plx
  pla
  rts
 
