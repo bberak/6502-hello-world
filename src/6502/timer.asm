@@ -72,7 +72,8 @@ main:
  lda #%11000000
  sta IER
 
- lda #%11000000; Countinuous timer interrupts (intervals) with output on PB7
+ ; Countinuous timer interrupts (intervals) with output on PB7
+ lda #%11000000
  sta ACR
 
  ; Load timer 1 with $ffff to initiate countdown

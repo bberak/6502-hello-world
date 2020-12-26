@@ -39,6 +39,9 @@ PORTB = $6000
 PORTA = $6001
 DDRB  = $6002
 DDRA  = $6003
+T1_LC = $6004
+T1_HC = $6005
+ACR = $600b
 PCR = $600c
 IFR = $600d
 IER = $600e
@@ -73,6 +76,21 @@ main:
 
  jsr lcd_init
 
+ ; Enable interrupts for timer 1
+ lda #%11000000
+ sta IER
+
+ ; Countinuous timer interrupts (intervals) with output on PB7
+ ;lda #%11000000 
+ ;sta ACR
+
+ ; Load timer 1 with $ffff to initiate countdown
+ lda #$ff
+ sta T1_LC
+ sta T1_HC
+
+ cli ; Enable interrupts
+
  ; Set counters to zero
  lda #0
  sta player_1_counter
@@ -85,15 +103,19 @@ game_loop:
  jsr count_presses
  jsr print_presses
  jsr lcd_nextline
+ jsr print_timer
+ jsr lcd_return
+ jmp game_loop
 
+print_timer:
+ pha
  lda #<timer_label
  sta string_ptr
  lda #>timer_label
  sta string_ptr + 1
  jsr print_string_ptr
-
- jsr lcd_return
- jmp game_loop
+ pla
+ rts
 
 print_presses:
  pha
@@ -202,7 +224,7 @@ increment_player_2_counter_break:
 
 nmi:
 irq:
- nop
+ bit T1_LC ; Clear the interrupt by reading low order timer count
  rti
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
