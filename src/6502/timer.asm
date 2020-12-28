@@ -86,7 +86,8 @@ main:
  sta counter
  sta counter + 1
 
- cli ; Enable interrupts
+ ; Enable interrupts
+ cli 
 
 main_loop:
  lda counter

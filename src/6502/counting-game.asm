@@ -78,19 +78,20 @@ main:
  jsr lcd_init
 
  ; Enable interrupts for timer 1
- lda #%11000000
- sta IER
+ ;lda #%11000000
+ ;sta IER
 
  ; Countinuous timer interrupts (intervals) with output on PB7
- lda #%11000000
- sta ACR
+ ;lda #%11000000
+ ;sta ACR
 
  ; Load timer 1 with $ffff to initiate countdown
- lda #$ff
- sta T1_LC
- sta T1_HC
+ ;lda #$ff
+ ;sta T1_LC
+ ;sta T1_HC
 
- cli ; Enable interrupts
+ ; Enable interrupts
+ ;cli 
 
  ; Set counters to zero
  lda #0
@@ -102,20 +103,8 @@ main:
  sta interrupt_counter
 
 game_loop:
- ;jsr count_presses
- ;jsr print_presses
- ;jsr lcd_nextline
- ;jsr print_timer
- 
- jsr lcd_nextline
-
- lda interrupt_counter
- sta number
- lda #0
- sta number + 1
- jsr number_to_string
- jsr print_string
-
+ jsr count_presses
+ jsr print_presses
  jsr lcd_return
  jmp game_loop
 
