@@ -57,8 +57,9 @@ player_1_counter = $0200
 player_2_counter = player_1_counter + 2
 prev_porta = player_2_counter + 2
 char_index = prev_porta + 1
+interrupt_counter = char_index + 1
 
-number = char_index + 1
+number = interrupt_counter + 1
 mod_10 = number + 2
 string = mod_10 + 2
 
@@ -81,8 +82,8 @@ main:
  sta IER
 
  ; Countinuous timer interrupts (intervals) with output on PB7
- ;lda #%11000000 
- ;sta ACR
+ lda #%11000000
+ sta ACR
 
  ; Load timer 1 with $ffff to initiate countdown
  lda #$ff
@@ -98,12 +99,23 @@ main:
  sta player_2_counter
  sta player_2_counter + 1
  sta prev_porta
+ sta interrupt_counter
 
 game_loop:
- jsr count_presses
- jsr print_presses
+ ;jsr count_presses
+ ;jsr print_presses
+ ;jsr lcd_nextline
+ ;jsr print_timer
+ 
  jsr lcd_nextline
- jsr print_timer
+
+ lda interrupt_counter
+ sta number
+ lda #0
+ sta number + 1
+ jsr number_to_string
+ jsr print_string
+
  jsr lcd_return
  jmp game_loop
 
@@ -225,6 +237,7 @@ increment_player_2_counter_break:
 nmi:
 irq:
  bit T1_LC ; Clear the interrupt by reading low order timer count
+ inc interrupt_counter
  rti
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;
