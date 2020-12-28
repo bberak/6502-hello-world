@@ -53,7 +53,7 @@ npm run vice build/file.prg
 
 > You will most likely need to change the assembler instruction set to `6510` see above.
 
-## Writing to EEPROMs (Untested)
+## Writing to EEPROMs 
 
 To write your program to a rom, run:
 
