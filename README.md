@@ -1,4 +1,4 @@
-# 6502-hello-world
+# 6502 Hello World
 
 A repo for holding my 6502 hello world code
 
